@@ -6,5 +6,6 @@ It contains :
 
 1. SVM
 -------
+
 2.Logistic Regression
 ----------------------
