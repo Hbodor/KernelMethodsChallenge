@@ -74,7 +74,7 @@ class GaussianKernel(BaseKernel):
             Formula : exp( - || x-y ||² / (2*sigma²))
     
         """
-        return np.exp(- (np.linalg.norm(x - y, ord=2) ** 2) / \
+        return np.exp(- (np.linalg.norm(x - y, ord=2, axis=-1) ** 2) / \
                       ( 2 * self.sigma ** 2 ) )
 
     def gram(self, X):
