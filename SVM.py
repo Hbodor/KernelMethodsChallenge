@@ -3,6 +3,8 @@ import cvxopt
 import cvxopt.solvers
 from kernels import LinearKernel
 
+cvxopt.solvers.options['show_progress'] = False
+
 #Class for Soft Margin SVM with kernel function
 # Implementation with cvxopt
 class SVM(object):

@@ -15,6 +15,7 @@ y_train1 = pd.read_csv('data/Ytr1.csv', sep = ',')
 y_train2 = pd.read_csv('data/Ytr2.csv', sep = ',')
 print(f'length {y_train0.values.shape} {y_train1.values.shape} {y_train2.values.shape}')
 y_train = np.vstack((y_train0.values, y_train1.values, y_train2.values))[:,1]
+y_train = 2*y_train - 1
 print(y_train.shape)
 
 clf = SVM(HadamardKernel(), C = 100)
