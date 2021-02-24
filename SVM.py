@@ -2,8 +2,9 @@ import numpy as np
 import cvxopt
 import cvxopt.solvers
 from kernels import LinearKernel
+import time
 
-cvxopt.solvers.options['show_progress'] = False
+cvxopt.solvers.options['show_progress'] = True
 
 #Class for Soft Margin SVM with kernel function
 # Implementation with cvxopt
@@ -40,13 +41,11 @@ class SVM(object):
         """
         
         n, k = X.shape
-        
+        t=time.time()
+        print('Building Gram matrice')
         # Gram matrix
-        K = np.zeros((n, n))
-        for i in range(n):
-            for j in range(n):
-                K[i,j] = self.kernel(X[i], X[j])
-        
+        K = self.kernel.gram(X) 
+        print(f'Gram matrice built in {time.time() - t}s')
         P = cvxopt.matrix(np.outer(y,y) * K)
         q = cvxopt.matrix(np.ones(n) * -1)
         A = cvxopt.matrix(y, (1,n))

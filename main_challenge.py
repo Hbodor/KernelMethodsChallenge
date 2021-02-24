@@ -18,9 +18,8 @@ y_train = np.vstack((y_train0.values, y_train1.values, y_train2.values))[:,1]
 y_train = 2*y_train - 1
 print(y_train.shape)
 
-clf = SVM(HadamardKernel(), C = 100)
-print(X_train[:20,:].shape)
-clf.fit(X_train[:200,:], y_train[:200])
+clf = SVM(LinearKernel(), C = 1)
+clf.fit(X_train[:200], y_train[:200])
 
 y_pred_train = clf.predict(X_train[:200,:])
 print(confusion_matrix(y_train[:200],y_pred_train))
