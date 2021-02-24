@@ -7,113 +7,170 @@ import numpy as np
 # And http://crsouza.com/2010/03/17/kernel-functions-for-machine-learning-applications/#sigmoid
 
 
-def LinearKernel(x,y):
-    """
-    Parameters
-    ----------
-    x : array-like
-    y : array-like
+class LinearKernel(object):
 
-    Returns
-    -------
-    float
-        Formula : <x,y>
-
-    """
-    return x.dot(y.T)
-
-def GaussianKernel(x, y, sigma=1.0):
-    """
-
-    Parameters
-    ----------
-    x : array-like
-    y : array-like
-
-    sigma : float, optional
-         The default is 1.0.
-
-    Returns
-    -------
-    TYPE
-        Formula : exp( - || x-y ||² / (2*sigma²))
-
-    """
-    return np.exp(- (np.linalg.norm(x - y, ord=2) ** 2) / ( 2 * sigma ** 2 ) )
-
-def PolyKernel(x, y, gamma = 1, b = 0, degree = 2):
-    """Polynomial kernel function    
-
-    Parameters
-    ----------
-    x : array-like
-    y : array-like
-    gamma : float, optional
-         The default is 1.0.
-    b : float, optional
-         The default is 0.
-    degree : float, optional
-            The defaukt is 2
-    Returns
-    -------
-    TYPE
-        Formula:: K(x, y) = ( b + gamma*<x, y> )^degree
-        
-
-    """
-    return (b + gamma * np.dot(x, y)) ** degree
-
-
-def  HadamardKernel(x, y, alpha = 1):
-    """Hadamard kernel function
+    def __init__(self):
+        self.name = 'Linear'
     
-    Parameters
-    ----------
-    x : array-like
-    y : array-like
-    alpha : int, optional
-         The default is 1.
-
-    Returns
-    -------
-    TYPE
-        Formula::  K_a(x, y) = \Sum_k {|x_k|^a * |y_k|^a} / {2*(|x_k|^a + |y_k|^a)}
-       
-    """
-    abs_x_a = np.power(np.abs(x), alpha)
-    abs_y_a = np.power(np.abs(y), alpha)
-
-    return np.dot((abs_x_a * abs_y_a), 2 * (abs_x_a + abs_y_a))
-
-def LaplacianKernel(x, y, gamma=1.0):
-    """Laplacian kernel function
+    def __call__(self,x,y):
+        """
         Parameters
-    ----------
-    x : array-like
-    y : array-like
-    gamma : float, optional
-         The default is 1.0.
+        ----------
+        x : array-like
+        y : array-like
+    
+        Returns
+        -------
+        float
+            Formula : <x,y>
+        """
+        return x.dot(y.T)
 
-    Returns
-    -------
-    TYPE
-        Formula::  K_a(x, y) = -gamma* \sum( | x_i - y_i|)
-    """   
-    return np.exp(-gamma * np.sum(np.abs(x - y)))
+class GaussianKernel(object):
+    
+    def __init__(self, sigma =1):
+        self.sigma = sigma
+        self.name = 'Gaussian'
+
+    def __call__(self, x, y):
+        """
+        Parameters
+        ----------
+        x : array-like
+        y : array-like
+    
+        sigma : float, optional
+             The default is 1.0.
+    
+        Returns
+        -------
+        float
+            Formula : exp( - || x-y ||² / (2*sigma²))
+    
+        """
+        return np.exp(- (np.linalg.norm(x - y, ord=2) ** 2) / \
+                      ( 2 * self.sigma ** 2 ) )
+
+class PolyKernel(object):
+    
+    def __init__( self, gamma = 1, b = 0, degree = 2):
+        """Polynomial kernel function    
+
+        Parameters
+        ----------
+        x : array-like
+        y : array-like
+        gamma : float, optional
+             The default is 1.0.
+        b : float, optional
+             The default is 0.
+        degree : float, optional
+                The defaukt is 2
+        """
+        self.gamma = gamma
+        self.b = b
+        self.degree = degree
+        self.name = 'Polynomial'
+        
+    def __call__(self, x, y,):
+        """Polynomial kernel function    
+    
+        Parameters
+        ----------
+        x : array-like
+        y : array-like
+        
+        Returns
+        -------
+        float
+            Formula:: K(x, y) = ( b + gamma*<x, y> )^degree
+            
+        """
+        return (self.b + self.gamma * np.dot(x, y)) ** self.degree
 
 
-def Chi2Kernel(x,y, gamma = 1.0):
-    """Chi-squared kernel function
-    This kernel is implemented as::
-        k(x, y) = exp(-gamma * Sum [(x - y)^2 / (x + y)])
-    """
-    return np.exp(-gamma * np.nansum(np.power(x - y, 2) / (x + y)))
+class  HadamardKernel(object):
+    
+    def __init__(self, alpha = 1):
+        self.alpha = alpha
+        self.name = 'Hadamard'
+
+    def __call__(self, x, y):
+        """Hadamard kernel function
+        
+        Parameters
+        ----------
+        x : array-like
+        y : array-like
+        alpha : int, optional
+             The default is 1.
+    
+        Returns
+        -------
+        TYPE
+            Formula::  K_a(x, y) = \Sum_k {|x_k|^a * |y_k|^a} / {2*(|x_k|^a + |y_k|^a)}
+           
+        """
+        abs_x_a = np.power(np.abs(x), self.alpha)
+        abs_y_a = np.power(np.abs(y), self.alpha)
+    
+        return np.dot((abs_x_a * abs_y_a), 2 * (abs_x_a + abs_y_a))
+
+class LaplacianKernel(object):
+    
+    def __init__(self, gamma = 1.0):
+        """Laplacian kernel function
+            Parameters
+        ----------
+        gamma : float, optional
+             The default is 1.0.
+    
+        """
+        self.gamma = gamma
+        self.name = 'Laplacian'
+    
+    def __call__(self, x, y):
+        """Laplacian kernel function
+            Parameters
+        ----------
+        x : array-like
+        y : array-like
+        gamma : float, optional
+             The default is 1.0.
+    
+        Returns
+        -------
+        float
+            Formula::  K_a(x, y) = -gamma* \sum( |x_i - y_i| )
+        """   
+        return np.exp(-self.gamma * np.sum(np.abs(x - y)))
 
 
+class Chi2Kernel(object):
+    
+    def __init(self, gamma = 1.0):
+        self.gamma = gamma
+        self.name = 'Chi2'
 
-def SigmoidKernel(x, y, alpha=1.0, c=1.0):
-    """SigmoidKernel
+    def __call__(self, x, y):
+        """Chi-squared kernel function
         This kernel is implemented as::
-        k(x, y) = tanh(alpha * <x,y> + c)
-    """
-    return np.tanh(c + alpha * np.dot(x, y))
+            k(x, y) = exp(-gamma * Sum [(x - y)^2 / (x + y)])
+        """
+        return np.exp(-self.gamma * np.nansum(np.power(x - y, 2) / (x + y)))
+
+
+
+class SigmoidKernel(object):
+    
+    def __init__(self, alpha = 1.0, c = 1.0):
+        self.alpha = alpha
+        self.c = c
+        self.name = 'Sigmoid'
+
+    def __call__(x, y, alpha=1.0, c=1.0):
+        """SigmoidKernel
+            This kernel is implemented as::
+            k(x, y) = tanh(alpha * <x,y> + c)
+        """
+        return np.tanh(c + alpha * np.dot(x, y))
