@@ -1,6 +1,6 @@
 # File containing all kernels that will be considered
 import numpy as np
-from scipy.spatial.distance import pdist, squareform
+from scipy.spatial.distance import pdist, squareform, cdist
 
 
 #Inspired from https://github.com/raamana/kernelmethods/blob/master/kernelmethods/numeric_kernels.py
@@ -18,6 +18,9 @@ class BaseKernel():
             K[i, i] = self(X[i], X[i])
         return K
         
+    def pairwise_kernel(self, X_1, X_2):
+        K = cdist(X_1, X_2, metric=self)
+        return K
         
 class LinearKernel(BaseKernel):
 
@@ -50,10 +53,13 @@ class LinearKernel(BaseKernel):
         Gram matrice: array-like
         """
         return X.dot(X.T)
+    
+    def pairwise_kernel(self, X_1, X_2):
+        return X_1.dot(X_2.T)
 
 class GaussianKernel(BaseKernel):
     
-    def __init__(self, sigma =1):
+    def __init__(self, sigma = 1):
         super().__init__()
         self.sigma = sigma
         self.name = 'Gaussian'
@@ -94,7 +100,11 @@ class GaussianKernel(BaseKernel):
         pairwise_dists = squareform(pdist(X, 'sqeuclidean'))
         K = np.exp(- pairwise_dists / self.sigma ** 2)
         return K
-
+    
+    def pairwise_kernel(self, X_1, X_2):
+        pairwise_dists = cdist(X_1, X_2, metric='sqeuclidean')
+        K = np.exp( -pairwise_dists/self.sigma**2)
+        return K
 
 class PolyKernel(BaseKernel):
     
@@ -150,6 +160,9 @@ class PolyKernel(BaseKernel):
             
         """
         return (self.b + self.gamma * X.dot(X.T)) ** self.degree
+    
+    def pairwise_kernel(self, X_1, X_2):
+        return (self.b + self.gamma * X_1.dot(X_2.T)) ** self.degree
 
 
 class  HadamardKernel(BaseKernel):
@@ -248,3 +261,6 @@ class SigmoidKernel(BaseKernel):
             k(x, y) = tanh(alpha * <x,y> + c)
         """
         return np.tanh(self.c + self.alpha * X.dot(X.T))
+    
+    def pairwise_kernel(self, X_1, X_2):
+        return np.tanh(self.c + self.alpha * X_1.dot(X_2.T))

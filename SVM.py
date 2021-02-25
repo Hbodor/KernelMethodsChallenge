@@ -97,8 +97,8 @@ class SVM(object):
             return np.dot(X, self.w) + self.b
         else:
             y_predict = np.zeros(len(X))
-            for i in range(len(X)):
-                y_predict[i] = np.sum(self.a * self.sv_y * self.kernel(self.sv, X[i]))
+            K = self.kernel.pairwise_kernel(X, self.sv)
+            y_predict = np.sum(self.a * self.sv_y * K, axis=1)
         return y_predict + self.b
 
     def predict(self, X):
