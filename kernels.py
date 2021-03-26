@@ -226,7 +226,7 @@ class LaplacianKernel(BaseKernel):
 
 class Chi2Kernel(BaseKernel):
     
-    def __init(self, gamma = 1.0):
+    def __init__(self, gamma = 1.0):
         super().__init__()
         self.gamma = gamma
         self.name = 'Chi2'

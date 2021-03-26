@@ -1,13 +1,13 @@
 import numpy as np
 from kernels import LinearKernel
-from ridge_utils import solveKRR
+from ridge_utils import solveKLRR
 
 class KernelLogisticRidge():
     
     
     def __init__(self, kernel=LinearKernel(), l=0.01):
         '''
-        Kernel Ridge Regression class
+        Kernel Logistic Ridge Regression class
         
         Parameters
         ----------
@@ -23,7 +23,7 @@ class KernelLogisticRidge():
         
     def fit(self, X=None, y=None, K=None):
         '''
-        Learning the Kernel Ridge Regression weights
+        Learning the Kernel Logistic Ridge Regression weights
 
         Either X or K should be given
         Parameters
@@ -46,7 +46,7 @@ class KernelLogisticRidge():
         if K is None:
             K = self.kernel.gram(X)
             
-        self.alpha = solveKRR(y, K, self.l)
+        self.alpha = solveKLRR(y, K, self.l)
         
     def project(self, X, pairwise_K = None):
         '''

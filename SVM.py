@@ -109,6 +109,9 @@ class SVM(object):
             y_predict = np.zeros(len(X))
             if pairwise_K is None:
                 pairwise_K = self.kernel.pairwise_kernel(X, self.sv)
+            else:
+                assert pairwise_K.shape[0] == X.shape[0], 'Pairwise K should be computed as pairwise_K(i, j) = K(X[i], X_train[j] )'
+
             y_predict = np.sum(self.a * self.sv_y * pairwise_K, axis=1)
         return y_predict + self.b
 
