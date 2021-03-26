@@ -3,6 +3,8 @@ import cvxopt
 import cvxopt.solvers
 from kernels import LinearKernel
 import time
+from sklearn.metrics import accuracy_score
+
 
 cvxopt.solvers.options['show_progress'] = True
 
@@ -10,7 +12,7 @@ cvxopt.solvers.options['show_progress'] = True
 # Implementation with cvxopt
 class SVM(object):
     
-    def __init__(self, kernel=LinearKernel() , C=None):
+    def __init__(self, kernel=LinearKernel, C=None, **kernel_params):
         """
         Parameters
         ----------
@@ -25,11 +27,15 @@ class SVM(object):
         None.
 
         """
-        self.kernel = kernel
+        if isinstance(kernel, type):
+            #uninitialized kernel
+            self.kernel = kernel(**kernel_params)
+        else:
+            self.kernel = kernel
         self.C = C
         if self.C is not None: self.C = float(self.C)
     
-    def fit(self, X, y):
+    def fit(self, X, y, K = None):
         """
 
         Parameters
@@ -41,11 +47,15 @@ class SVM(object):
         """
         
         n, k = X.shape
-        t=time.time()
-        print('Building Gram matrice')
+        
+        
         # Gram matrix
-        K = self.kernel.gram(X) 
-        print(f'Gram matrice built in {time.time() - t}s')
+        if K is None:
+            t=time.time()
+            print('Building Gram matrice')
+            K = self.kernel.gram(X) 
+            print(f'Gram matrice built in {time.time() - t}s')
+            
         P = cvxopt.matrix(np.outer(y,y) * K)
         q = cvxopt.matrix(np.ones(n) * -1)
         A = cvxopt.matrix(y, (1,n))
@@ -92,14 +102,19 @@ class SVM(object):
         else:
             self.w = None
     
-    def project(self, X):
+    def project(self, X, pairwise_K = None):
         if self.w is not None:
             return np.dot(X, self.w) + self.b
         else:
             y_predict = np.zeros(len(X))
-            K = self.kernel.pairwise_kernel(X, self.sv)
-            y_predict = np.sum(self.a * self.sv_y * K, axis=1)
+            if pairwise_K is None:
+                pairwise_K = self.kernel.pairwise_kernel(X, self.sv)
+            y_predict = np.sum(self.a * self.sv_y * pairwise_K, axis=1)
         return y_predict + self.b
 
-    def predict(self, X):
-        return np.sign(self.project(X))
+    def predict(self, X, pairwise_K = None):
+        return np.sign(self.project(X, pairwise_K = pairwise_K))
+    
+    def score(self, X, y, sample_weight=None):
+        y_pred = self.predict(X)
+        return accuracy_score(y, y_pred, sample_weight=sample_weight)
