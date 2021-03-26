@@ -1,13 +1,14 @@
 # File containing all kernels that will be considered
 import numpy as np
 from scipy.spatial.distance import pdist, squareform, cdist
-
+from utils import *
+import time
 
 #Inspired from https://github.com/raamana/kernelmethods/blob/master/kernelmethods/numeric_kernels.py
 # And http://crsouza.com/2010/03/17/kernel-functions-for-machine-learning-applications/#sigmoid
 class BaseKernel():
     def __init__(self):
-        pass
+        self.name = 'Base'
     
     def __call__(self, x, y):
         pass
@@ -264,3 +265,94 @@ class SigmoidKernel(BaseKernel):
     
     def pairwise_kernel(self, X_1, X_2):
         return np.tanh(self.c + self.alpha * X_1.dot(X_2.T))
+    
+    
+    
+class MismatchKernel(BaseKernel):
+    
+    def __init__(self, k = 1, m = 0, approximated = False):
+        """
+        
+
+        Parameters
+        ----------
+        k : TYPE, optional
+            DESCRIPTION. The default is 1.
+        m : TYPE, optional
+            DESCRIPTION. The default is 0.
+        approximated : TYPE, optional
+            DESCRIPTION. The default is False.
+
+        Returns
+        -------
+        None.
+
+        """
+        super().__init__()
+        self.k = k
+        self.m = m
+        if approximated:
+            self.get_embeddings = get_embeddings_approximated
+        else:
+            self.get_embeddings = get_embeddings
+        self.name = 'Mismatch'
+    
+    def __call__(self, x, y):
+        """Polynomial kernel function    
+    
+        Parameters
+        ----------
+        x : /!\ Dictionary of embeddings (\phi(x)))
+        y : /!\ Dictionary of embeddings (\phi(y)))
+        
+        Returns
+        -------
+        float
+            Formula:: K(x, y) = ( b + gamma*<x, y> )^degree
+            
+        """
+        return get_mismatch(x,y)
+    
+    
+        
+        
+    def gram(self, X):
+        """Polynomial kernel function    
+    
+        Parameters
+        ----------
+        x : array-like
+        y : array-like
+        
+        Returns
+        -------
+        float
+            Formula:: K(x, y) = ( b + gamma*<x, y> )^degree
+            
+        """
+        t1 = time.time()
+        kmers, last_idx = get_all_kmers(X.flatten().tolist(), self.k, alph_dict_n)
+        print('finished kmers after', time.time() - t1)
+        t1 = time.time()
+        emb , kmers, last_idx = self.get_embeddings(X.flatten().tolist(), 
+                                                            self.k, self.m, kmers, 
+                                                            last_idx, alph_dict_n)
+
+        return get_gram_mismatch(emb, 20)
+    
+    
+    def pairwise_kernel(self, X_1, X_2):
+        t1 = time.time()
+        kmers1, last_idx1 = get_all_kmers(X_1.flatten().tolist(), self.k, alph_dict_n)
+        kmers2, last_idx2 = get_all_kmers(X_2.flatten().tolist(), self.k, alph_dict_n)
+        print('finished kmers after', time.time() - t1)
+        t1 = time.time()
+        emb1 , kmers1, last_idx1 = self.get_embeddings(X_1.flatten().tolist(), 
+                                                            self.k, self.m, kmers1, 
+                                                            last_idx1, alph_dict_n)
+        emb2 , kmers2, last_idx2 = self.get_embeddings(X_2.flatten().tolist(), 
+                                                    self.k, self.m, kmers2, 
+                                                    last_idx2, alph_dict_n)
+        return get_pairwise_mismatch(emb1, emb2, 20)
+        
+    
